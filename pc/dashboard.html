@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>netEspNow v1.4 · Dashboard</title>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --border: #2a2d37;
+    --text: #8b8fa3; --dim: #5a5e6e; --accent: #6c8cd9;
+    --on: #4caf7d; --warn: #d4a853; --down: #5b8cc7; --up: #6caf7d;
+    --radius: 8px; --font: system-ui, sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; height: 100vh; overflow: hidden; }
+
+  #topbar { height: 48px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 14px; flex-shrink: 0; }
+  .logo { font-weight: 700; color: #fff; font-size: 15px; }
+  .logo span { color: var(--accent); }
+  .pill { font-size: 10px; padding: 3px 10px; border-radius: 12px; font-weight: 500; }
+  .pill.online { background: rgba(76,175,125,.12); color: var(--on); }
+
+  #layout { display: flex; height: calc(100vh - 48px - 52px); }
+  #left { width: 200px; background: var(--card); border-right: 1px solid var(--border); padding: 14px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; overflow-y: auto; }
+  .stat-block { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--dim); }
+  .stat-value { font-size: 22px; font-weight: 600; color: #fff; }
+  .stat-value.ok { color: var(--on); }
+
+  #center { flex: 1; background: var(--card); border-left: 1px solid var(--border); border-right: 1px solid var(--border); position: relative; overflow: hidden; }
+
+  #right { width: 260px; background: var(--card); border-left: 1px solid var(--border); padding: 12px; display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+  #right h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--dim); margin-bottom: 8px; }
+  .log-entry { font-family: monospace; font-size: 11px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.03); display: flex; gap: 8px; align-items: center; }
+  .log-time { color: var(--dim); font-size: 10px; min-width: 52px; }
+  .log-dir { width: 18px; height: 18px; border-radius: 3px; font-size: 9px; line-height: 18px; text-align: center; font-weight: 700; flex-shrink: 0; }
+  .log-dir.down { background: rgba(91,140,199,.1); color: var(--down); }
+  .log-dir.up   { background: rgba(108,175,125,.1); color: var(--up); }
+  .log-msg { color: #aaa; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .log-rtt { color: var(--dim); font-size: 10px; }
+
+  #bottombar { height: 52px; background: var(--card); border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; gap: 10px; flex-shrink: 0; }
+  #bottombar input, #bottombar select { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 14px; color: #fff; font-family: var(--font); font-size: 13px; outline: none; }
+  #bottombar select { cursor: pointer; }
+  #bottombar input:focus { border-color: var(--accent); }
+  .btn { padding: 8px 20px; border-radius: var(--radius); font-weight: 600; font-size: 12px; cursor: pointer; border: none; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(1.2); }
+  .btn.secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .btn.secondary:hover { border-color: var(--accent); color: #fff; }
+
+  /* ─── CIRCLES ────────────────────────── */
+  .circle {
+    position: absolute; border-radius: 50%;
+    border: 2px dashed transparent; pointer-events: none;
+  }
+  .circle.c0 { border-color: rgba(108,140,217,.28); background: rgba(108,140,217,.020); }
+  .circle.c1 { border-color: rgba(212,168,83,.24);  background: rgba(212,168,83,.015); }
+  .circle.c2 { border-color: rgba(76,175,125,.24);  background: rgba(76,175,125,.015); }
+
+  .lbl {
+    position: absolute; text-align: center; pointer-events: none;
+    transform: translate(-50%,-50%);
+  }
+  .lbl strong { color: #ccc; font-size: 11px; display:block; }
+  .lbl span { font-size: 9px; color: var(--dim); }
+
+  .nd {
+    position: absolute; transform: translate(-50%,-50%);
+    text-align: center; z-index: 3;
+  }
+  .nd .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    margin: 0 auto 4px; border: 1.5px solid transparent;
+    transition: all .4s ease;
+  }
+  .nd .dot.br { width:17px; height:17px; background: #7b9cd6; box-shadow: 0 0 6px rgba(123,156,214,.3); }
+  .nd .dot.gw { width:17px; height:17px; background: #5a7cc9; box-shadow: 0 0 6px rgba(90,124,201,.3); }
+  .nd .dot.eb { background: #d4a853; }
+  .nd .dot.ep { background: #4caf7d; }
+  .nd .t { font-size: 9px; color: var(--dim); transition: color .3s; white-space: nowrap; }
+  .nd.big .t { font-size: 11px; font-weight: 500; color: #aaa; }
+
+  .nd.hl .dot { transform: scale(2); }
+  .nd.hl .dot.br { box-shadow: 0 0 20px #7b9cd6; border-color:#7b9cd6; }
+  .nd.hl .dot.gw { box-shadow: 0 0 20px #5a7cc9; border-color:#5a7cc9; }
+  .nd.hl .dot.eb { box-shadow: 0 0 16px #d4a853; border-color:#d4a853; }
+  .nd.hl .dot.ep { box-shadow: 0 0 16px #4caf7d; border-color:#4caf7d; }
+  .nd.hl .t { color: #fff; font-weight: 600; }
+
+  .ct-gw {
+    position: absolute; transform: translate(-50%,-50%);
+    text-align: center; z-index: 5; cursor: default;
+  }
+  .ct-gw .ring {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--warn);
+    background: rgba(212,168,83,.10);
+    margin: 0 auto 4px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .ct-gw .tl { font-size: 10px; color: var(--warn); font-weight: 600; white-space: nowrap; margin-top: 2px; }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(212,168,83,.25); }
+    50%     { box-shadow: 0 0 0 8px rgba(212,168,83,0); }
+  }
+
+  /* Connecting line between touching circles */
+  .touch-line {
+    position: absolute; pointer-events: none; z-index: 1;
+    border-top: 1px dashed rgba(212,168,83,.15);
+    transform-origin: left center;
+  }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo">netEsp<span>Now</span> v1.4</div>
+  <span class="pill online">● Operativo</span>
+  <span style="margin-left:auto;color:var(--dim);font-size:11px">Canal 1 · 115200 baud · 22 ESPs online</span>
+</div>
+
+<div id="layout">
+  <div id="left">
+    <div class="stat-block"><div class="stat-label">Online</div><div class="stat-value ok" id="onlineCount">22 / 22</div></div>
+    <div class="stat-block"><div class="stat-label">Último RTT</div><div class="stat-value" id="lastRtt">18 ms</div></div>
+    <div class="stat-block"><div class="stat-label">Niveles</div><div class="stat-value">3</div></div>
+    <div class="stat-block"><div class="stat-label">Mensajes</div><div class="stat-value">1,247</div></div>
+    <div style="margin-top:auto;font-size:9px;color:var(--dim);line-height:1.8">
+      <div><span style="color:#7b9cd6">●</span> Bridge</div>
+      <div><span style="color:#5a7cc9">●</span> Gateway</div>
+      <div><span style="color:#d4a853">●</span> Endpoint-Bridge</div>
+      <div><span style="color:#4caf7d">●</span> Endpoint</div>
+      <div style="margin-top:3px"><span style="color:var(--warn)">◎</span> Gateway contacto</div>
+    </div>
+  </div>
+
+  <div id="center"></div>
+
+  <div id="right">
+    <h3>Registro de mensajes</h3>
+    <div id="logArea"></div>
+  </div>
+</div>
+
+<div id="bottombar">
+  <select id="cmdSelect" style="min-width:110px">
+    <option value="READ">Leer Sensor</option>
+    <option value="LED">LED</option>
+    <option value="RELAY">Relé</option>
+    <option value="PING">Ping</option>
+  </select>
+  <input type="text" id="destInput" placeholder="E2.3" value="E2.3" style="max-width:100px">
+  <input type="text" id="valInput" placeholder="Valor" style="max-width:70px">
+  <button class="btn primary" onclick="sendCommand()">Enviar</button>
+  <button class="btn secondary" onclick="pingAll()">Ping Todos</button>
+  <span style="font-size:10px;color:var(--dim);margin-left:auto;">Enter</span>
+</div>
+
+<script>
+const C = document.getElementById('center');
+const L = document.getElementById('logArea');
+
+// ══════════════════════════════════════════
+//  Bridge₀ → Gateway₀ → [C0] → C1 → C2
+//  Cadena: C0 toca C1, C1 toca C2
+// ══════════════════════════════════════════
+
+function build() {
+  C.innerHTML = '';
+  const W = C.clientWidth, H = C.clientHeight;
+  const r0 = Math.min(W,H)*.14, r1 = Math.min(W,H)*.15, r2 = Math.min(W,H)*.12;
+
+  // ── Calcular posiciones de los círculos ──
+  const contact0 = 120; // C0→C1 angle (down-right)
+  const contact1 = 140; // C1→C2 angle (down-right)
+  const gap01 = r0 + r1 + 12;
+  const gap12 = r1 + r2 + 12;
+
+  // Posición tentativa de C0
+  let c0x = W/2, c0y = H*.38;
+
+  // C1 a la derecha-abajo de C0
+  const c0r_rad = contact0 * Math.PI/180;
+  const c1x = c0x + gap01 * Math.cos(c0r_rad);
+  const c1y = c0y + gap01 * Math.sin(c0r_rad);
+
+  // C2 a la derecha-abajo de C1
+  const c1r_rad = contact1 * Math.PI/180;
+  const c2x = c1x + gap12 * Math.cos(c1r_rad);
+  const c2y = c1y + gap12 * Math.sin(c1r_rad);
+
+  // ── Centrar toda la figura ──
+  // Bounding box
+  const bLeft   = Math.min(c0x - r0, 0);
+  const bRight  = Math.max(c2x + r2, c1x + r1, c0x + r0);
+  const bTop    = 12; // Bridge₀
+  const bBottom = Math.max(c2y + r2, c1y + r1, c0y + r0);
+
+  const figW = bRight - bLeft;
+  const figH = bBottom - bTop;
+  const shiftX = (W - figW) / 2 - bLeft;
+  const shiftY = (H - figH) / 2 - bTop;
+
+  c0x += shiftX; c0y += shiftY;
+  // Recalc C1, C2
+  const c1x2 = c0x + gap01 * Math.cos(c0r_rad);
+  const c1y2 = c0y + gap01 * Math.sin(c0r_rad);
+  const c2x2 = c1x2 + gap12 * Math.cos(c1r_rad);
+  const c2y2 = c1y2 + gap12 * Math.sin(c1r_rad);
+
+  // ── Bridge₀ + Gateway₀ ────────────────
+  addNd(c0x, c0y - r0 - 56, 'Bridge₀', 'br', 'bridge', true);
+  addNd(c0x, c0y - r0 - 28, 'Gateway₀', 'gw', 'gw0', true);
+
+  // ── C0: Nivel 0 ───────────────────────
+  addCircle(c0x, c0y, r0, 'c0');
+  addLbl(c0x, c0y - r0 - 18, 'NIVEL 0', 'PMK₀');
+
+  addCircleNode(c0x, c0y, r0, -150, 'E0.2', 'ep', 'e02');
+  addCircleNode(c0x, c0y, r0, -100, 'E0.3', 'ep', 'e03');
+  addCircleNode(c0x, c0y, r0,  -50, 'E0.4', 'ep', 'e04');
+  addCircleNode(c0x, c0y, r0,    0, 'E0.1', 'eb', 'e01');
+
+  // ── Gateway₁: punto de unión C0 ↔ C1 ──
+  const c0rx = c0x + r0 * Math.cos(c0r_rad);
+  const c0ry = c0y + r0 * Math.sin(c0r_rad);
+  const gw1x = (c0rx + (c1x2 - r1 * Math.cos(c0r_rad))) / 2;
+  const gw1y = (c0ry + (c1y2 - r1 * Math.sin(c0r_rad))) / 2;
+  addGateway(gw1x, gw1y, 'Gateway₁');
+
+  // ── C1: Nivel 1 ───────────────────────
+  addCircle(c1x2, c1y2, r1, 'c1');
+  addLbl(c1x2, c1y2 - r1 - 18, 'NIVEL 1', 'PMK₁ · 9 endpoints');
+  addTouchLine(c0x, c0y, c1x2, c1y2, r0, r1);
+
+  addCircleNode(c1x2, c1y2, r1,-150, 'E1.1', 'eb', 'e11');
+  addCircleNode(c1x2, c1y2, r1,-115, 'E1.2', 'ep', 'e12');
+  addCircleNode(c1x2, c1y2, r1, -80, 'E1.3', 'ep', 'e13');
+  addCircleNode(c1x2, c1y2, r1, -45, 'E1.4', 'ep', 'e14');
+  addCircleNode(c1x2, c1y2, r1, -10, 'E1.5', 'ep', 'e15');
+  addCircleNode(c1x2, c1y2, r1,  25, 'E1.6', 'ep', 'e16');
+  addCircleNode(c1x2, c1y2, r1,  60, 'E1.7', 'ep', 'e17');
+  addCircleNode(c1x2, c1y2, r1,  95, 'E1.8', 'ep', 'e18');
+  addCircleNode(c1x2, c1y2, r1, 130, 'E1.9', 'ep', 'e19');
+
+  // ── Gateway₂: punto de unión C1 ↔ C2 ──
+  const c1r_rad2 = contact1 * Math.PI/180;
+  const c1rx = c1x2 + r1 * Math.cos(c1r_rad2);
+  const c1ry = c1y2 + r1 * Math.sin(c1r_rad2);
+  const gw2x = (c1rx + (c2x2 - r2 * Math.cos(c1r_rad2))) / 2;
+  const gw2y = (c1ry + (c2y2 - r2 * Math.sin(c1r_rad2))) / 2;
+  addGateway(gw2x, gw2y, 'Gateway₂');
+
+  // ── C2: Nivel 2 ───────────────────────
+  addCircle(c2x2, c2y2, r2, 'c2');
+  addLbl(c2x2, c2y2 - r2 - 18, 'NIVEL 2', 'PMK₂ · 5 endpoints');
+  addTouchLine(c1x2, c1y2, c2x2, c2y2, r1, r2);
+
+  addCircleNode(c2x2, c2y2, r2,-140, 'E2.1', 'ep', 'e21');
+  addCircleNode(c2x2, c2y2, r2, -90, 'E2.2', 'ep', 'e22');
+  addCircleNode(c2x2, c2y2, r2, -40, 'E2.3', 'ep', 'e23');
+  addCircleNode(c2x2, c2y2, r2,  10, 'E2.4', 'ep', 'e24');
+  addCircleNode(c2x2, c2y2, r2,  60, 'E2.5', 'ep', 'e25');
+}
+
+// ── Helpers ─────────────────────────────
+function addCircle(cx, cy, r, cls) {
+  const el = document.createElement('div');
+  el.className = 'circle ' + cls;
+  el.style.left=(cx-r)+'px'; el.style.top=(cy-r)+'px';
+  el.style.width=(r*2)+'px'; el.style.height=(r*2)+'px';
+  C.appendChild(el);
+}
+
+function addLbl(x, y, t, s) {
+  const el = document.createElement('div'); el.className = 'lbl';
+  el.innerHTML = `<strong>${t}</strong><span>${s}</span>`;
+  el.style.left=x+'px'; el.style.top=y+'px'; C.appendChild(el);
+}
+
+function addCircleNode(cx, cy, r, deg, lbl, cls, id) {
+  const rad = deg * Math.PI/180;
+  addNd(cx + r*Math.cos(rad), cy + r*Math.sin(rad), lbl, cls, id);
+}
+function addNd(x, y, lbl, cls, id, big) {
+  const el = document.createElement('div');
+  el.className = 'nd' + (big ? ' big' : '');
+  el.id = 'node-' + id;
+  el.innerHTML = `<div class="dot ${cls}"></div><div class="t">${lbl}</div>`;
+  el.style.left=x+'px'; el.style.top=y+'px'; C.appendChild(el);
+}
+
+function addGateway(x, y, lbl) {
+  const el = document.createElement('div'); el.className = 'ct-gw';
+  el.innerHTML = `<div class="ring"></div><div class="tl">${lbl}</div>`;
+  el.style.left=x+'px'; el.style.top=y+'px'; C.appendChild(el);
+}
+
+function addTouchLine(x0, y0, x1, y1, r0, r1) {
+  const dx=x1-x0, dy=y1-y0;
+  const d=Math.sqrt(dx*dx+dy*dy);
+  if(d<1)return;
+  const ux=dx/d, uy=dy/d;
+  const sx=x0+ux*r0, sy=y0+uy*r0;
+  const ex=x1-ux*r1, ey=y1-uy*r1;
+  const len=Math.sqrt((ex-sx)**2+(ey-sy)**2);
+  const ang=Math.atan2(ey-sy,ex-sx)*180/Math.PI;
+
+  const el=document.createElement('div'); el.className='touch-line';
+  el.style.left=sx+'px'; el.style.top=sy+'px';
+  el.style.width=len+'px';
+  el.style.transform=`rotate(${ang}deg)`;
+  C.appendChild(el);
+}
+
+// ── Highlight ───────────────────────────
+function hl(path) {
+  document.querySelectorAll('.nd').forEach(n=>n.classList.remove('hl'));
+  path.forEach(id=>{
+    const el=document.getElementById('node-'+id);
+    if(el) el.classList.add('hl');
+  });
+  setTimeout(()=>path.forEach(id=>{
+    const el=document.getElementById('node-'+id);
+    if(el) el.classList.remove('hl');
+  }),2500);
+}
+
+// ── Log ─────────────────────────────────
+function log(dir, msg, rtt) {
+  const t=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const el=document.createElement('div'); el.className='log-entry';
+  el.innerHTML=`<span class="log-time">${t}</span><span class="log-dir ${dir==='↓'?'down':'up'}">${dir}</span><span class="log-msg">${msg}</span>${rtt?`<span class="log-rtt">${rtt}</span>`:''}`;
+  L.prepend(el);
+  while(L.children.length>60) L.lastChild.remove();
+}
+
+// ── Commands ────────────────────────────
+function sendCommand() {
+  const dest=document.getElementById('destInput').value.trim();
+  const cmd=document.getElementById('cmdSelect').value;
+  const val=document.getElementById('valInput').value.trim();
+  if(!dest)return;
+
+  const m={'E0.1':'1','E0.2':'2','E0.3':'3','E0.4':'4',
+    'E1.1':'1:1','E1.2':'1:2','E1.5':'1:5',
+    'E2.3':'1:1:3','E2.1':'1:1:1','E2.5':'1:1:5'};
+  const route=m[dest]||dest;
+
+  let path=['bridge','gw0'];
+  if(route.startsWith('1:')){
+    const p=route.split(':');
+    if(p.length===2) path.push('e01','gw1','e1'+p[1]);
+    else path.push('e01','gw1','e11','gw2','e2'+p[2]);
+  }else path.push('e0'+route);
+
+  hl(path);
+  log('↓',`→ ${dest} · ${cmd}${val?'='+val:''}  [${route}]`,'0');
+  setTimeout(()=>{
+    log('▶','Ejecutando...','');
+    setTimeout(()=>{
+      log('↑','Respuesta OK','18ms');
+      document.getElementById('lastRtt').textContent='18 ms';
+      hl([...path].reverse());
+    },600);
+  },1200);
+}
+
+function pingAll() {
+  ['E0.1','E0.2','E0.3','E0.4','E1.1','E1.2','E1.5','E2.3'].forEach((d,i)=>{
+    setTimeout(()=>{document.getElementById('destInput').value=d;sendCommand();},i*1000);
+  });
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='SELECT'))
+    sendCommand();
+});
+
+window.addEventListener('resize',build);
+build();
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 820" width="1280" height="820" role="img" aria-labelledby="secTitle secDesc">
+  <title id="secTitle">Seguridad en tres capas de netEspNow v1.4</title>
+  <desc id="secDesc">Capa C1: cifrado asimetrico entre Bridge_0 y Gateway_0. Capa C2: PMK nativa de ESP-NOW distinta por nivel. Capa C3: canal de radio dedicado. Se muestra ademas el doble contexto del endpoint-bridge y las limitaciones heredadas de la version anterior.</desc>
+
+  <defs>
+    <marker id="sgold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 L10,5 L0,0 z" fill="#d4a853"/>
+    </marker>
+    <marker id="sblue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 L10,5 L0,0 z" fill="#6c8cd9"/>
+    </marker>
+    <marker id="sgreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 L10,5 L0,0 z" fill="#4caf7d"/>
+    </marker>
+    <style><![CDATA[
+      .bg      { fill: #0b0e14; }
+      .panel   { fill: #131824; stroke: #26303f; stroke-width: 1.2; }
+      .title   { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #ffffff; font-weight: 700; }
+      .dim     { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; fill: #7c8698; }
+      .mono    { font-family: "JetBrains Mono", Menlo, Consolas, monospace; fill: #c7d0e0; }
+      .monodim { font-family: "JetBrains Mono", Menlo, Consolas, monospace; fill: #6d7789; }
+      .kicker  { font-family: "JetBrains Mono", Menlo, Consolas, monospace; letter-spacing: 3px; }
+      .node    { fill: #1a2130; stroke: #3c4a66; stroke-width: 1.2; }
+      .nodeGw  { fill: #223052; stroke: #6c8cd9; stroke-width: 1.5; }
+      .nodeEb  { fill: #2a2416; stroke: #d4a853; stroke-width: 1.5; }
+      .chip    { fill: #1c2434; stroke: #35425a; stroke-width: 1; }
+      .tag     { font-family: "JetBrains Mono", Menlo, Consolas, monospace; font-size: 9.5px; fill: #8fa6d8; }
+    ]]></style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1280" height="820"/>
+  <rect x="0" y="0" width="1280" height="4" fill="#d4a853"/>
+
+  <text class="title" x="48" y="58" font-size="25">Seguridad en tres capas</text>
+  <text class="dim" x="48" y="84" font-size="12.5">Una clave por nivel, un enlace asimetrico y un canal de radio dedicado. Nada mas, y nada menos.</text>
+  <text class="monodim" x="1232" y="58" font-size="10" text-anchor="end">docs/assets/security.svg</text>
+
+  <!-- ============ C1 ============ -->
+  <rect x="48" y="112" width="760" height="104" rx="9" fill="rgba(212,168,83,0.04)" stroke="#5c4a26" stroke-width="1"/>
+  <text class="kicker" x="64" y="134" font-size="9" fill="#d4a853">C1</text>
+  <text class="mono" x="100" y="134" font-size="10" fill="#d4a853">ECC asimetrico</text>
+  <text class="monodim" x="250" y="134" font-size="9">Bridge_0 &#8596; Gateway_0 &#183; unico salto con clave publica</text>
+
+  <rect class="node" x="80" y="152" width="148" height="44" rx="7"/>
+  <text class="mono" x="154" y="172" font-size="11" text-anchor="middle">Bridge_0</text>
+  <text class="monodim" x="154" y="187" font-size="8.5" text-anchor="middle">uECC + BearSSL</text>
+
+  <line x1="236" y1="174" x2="322" y2="174" stroke="#d4a853" stroke-width="1.7" marker-end="url(#sgold)"/>
+  <line x1="322" y1="186" x2="236" y2="186" stroke="#d4a853" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#sgold)"/>
+  <text class="monodim" x="279" y="168" font-size="8.5" text-anchor="middle" fill="#a98a45">firma + XOR</text>
+
+  <rect class="nodeGw" x="330" y="152" width="148" height="44" rx="7"/>
+  <text class="mono" x="404" y="172" font-size="11" text-anchor="middle" fill="#dce6ff">Gateway_0</text>
+  <text class="monodim" x="404" y="187" font-size="8.5" text-anchor="middle">hereda clave v1.3</text>
+
+  <text class="monodim" x="520" y="168" font-size="9.5">~50-200 ms por operacion.</text>
+  <text class="monodim" x="520" y="184" font-size="9.5">IRAM al limite en el Bridge.</text>
+
+  <!-- ============ C2 ============ -->
+  <rect x="48" y="232" width="760" height="238" rx="9" fill="rgba(108,140,217,0.035)" stroke="#33415c" stroke-width="1"/>
+  <text class="kicker" x="64" y="254" font-size="9" fill="#6c8cd9">C2</text>
+  <text class="mono" x="100" y="254" font-size="10" fill="#6c8cd9">PMK intra-nivel</text>
+  <text class="monodim" x="232" y="254" font-size="9">nativa ESP-NOW &#183; 16 bytes &#183; una por celula</text>
+
+  <!-- fila N0 -->
+  <text class="mono" x="80" y="290" font-size="9.5" fill="#7c8698">N0</text>
+  <rect class="nodeGw" x="108" y="274" width="110" height="30" rx="6"/>
+  <text class="mono" x="163" y="293" font-size="10" text-anchor="middle" fill="#dce6ff">Gateway_0</text>
+  <line x1="224" y1="289" x2="262" y2="289" stroke="#6c8cd9" stroke-width="1.3" marker-end="url(#sblue)"/>
+  <rect class="chip" x="268" y="274" width="94" height="30" rx="6" stroke="#d4a853"/>
+  <text class="tag" x="315" y="293" text-anchor="middle" fill="#d4a853">PMK_N0</text>
+  <text class="monodim" x="378" y="293" font-size="9.5">E0.1 &#183; E0.2 &#183; E0.3 &#183; E0.4</text>
+
+  <!-- fila N1 -->
+  <text class="mono" x="80" y="348" font-size="9.5" fill="#7c8698">N1</text>
+  <rect class="nodeGw" x="108" y="332" width="110" height="30" rx="6"/>
+  <text class="mono" x="163" y="351" font-size="10" text-anchor="middle" fill="#dce6ff">Gateway_1</text>
+  <line x1="224" y1="347" x2="262" y2="347" stroke="#6c8cd9" stroke-width="1.3" marker-end="url(#sblue)"/>
+  <rect class="chip" x="268" y="332" width="94" height="30" rx="6" stroke="#d4a853"/>
+  <text class="tag" x="315" y="351" text-anchor="middle" fill="#d4a853">PMK_N1</text>
+  <text class="monodim" x="378" y="351" font-size="9.5">E1.1 &#183; E1.2 &#183; ... &#183; E1.9</text>
+
+  <!-- fila N2 -->
+  <text class="mono" x="80" y="406" font-size="9.5" fill="#7c8698">N2</text>
+  <rect class="nodeGw" x="108" y="390" width="110" height="30" rx="6"/>
+  <text class="mono" x="163" y="409" font-size="10" text-anchor="middle" fill="#dce6ff">Gateway_2</text>
+  <line x1="224" y1="405" x2="262" y2="405" stroke="#6c8cd9" stroke-width="1.3" marker-end="url(#sblue)"/>
+  <rect class="chip" x="268" y="390" width="94" height="30" rx="6" stroke="#d4a853"/>
+  <text class="tag" x="315" y="409" text-anchor="middle" fill="#d4a853">PMK_N2</text>
+  <text class="monodim" x="378" y="409" font-size="9.5">E2.1 &#183; E2.2 &#183; ... &#183; E2.5</text>
+
+  <text class="monodim" x="80" y="448" font-size="9">Un endpoint de N1 solo descifra tramas de N1. Si inyecta en N0, el hardware descarta la trama antes de llegar al sketch.</text>
+
+  <!-- ============ C3 ============ -->
+  <rect x="48" y="486" width="760" height="96" rx="9" fill="rgba(76,175,125,0.035)" stroke="#2c4c3c" stroke-width="1"/>
+  <text class="kicker" x="64" y="508" font-size="9" fill="#4caf7d">C3</text>
+  <text class="mono" x="100" y="508" font-size="10" fill="#4caf7d">Canal dedicado</text>
+  <text class="monodim" x="232" y="508" font-size="9">Wi-Fi canal 1 fijo &#183; sin AP &#183; sin DHCP &#183; sin IP</text>
+
+  <text class="mono" x="80" y="538" font-size="10" fill="#c7d0e0">Todas las tramas viajan como ESP-NOW en el mismo canal de radio.</text>
+  <text class="monodim" x="80" y="558" font-size="9.5">No hay pila IP que atacar, no hay puerto que escanear, no hay handshake WPA que romper.</text>
+
+  <!-- ============ PANEL DERECHO: ENDPOINT-BRIDGE ============ -->
+  <rect x="840" y="112" width="392" height="470" rx="10" fill="#101725" stroke="#2c3648" stroke-width="1.2"/>
+  <text class="kicker" x="862" y="138" font-size="9" fill="#d4a853">COMPONENTE CRITICO</text>
+  <text class="mono" x="862" y="162" font-size="12" fill="#ffffff">Endpoint-bridge</text>
+  <text class="monodim" x="862" y="180" font-size="9">E0.1 y E1.1 &#183; una radio, dos mundos</text>
+
+  <rect class="nodeEb" x="862" y="198" width="348" height="72" rx="7"/>
+  <text class="mono" x="878" y="218" font-size="10" fill="#f0d79b">CTX ARRIBA &#183; PMK_N0</text>
+  <text class="monodim" x="878" y="236" font-size="9">padre: Gateway_0</text>
+  <text class="monodim" x="878" y="252" font-size="9">recibe comandos de nivel 0</text>
+
+  <rect class="nodeEb" x="862" y="308" width="348" height="72" rx="7"/>
+  <text class="mono" x="878" y="328" font-size="10" fill="#f0d79b">CTX ABAJO &#183; PMK_N1</text>
+  <text class="monodim" x="878" y="346" font-size="9">hijo: Gateway_1</text>
+  <text class="monodim" x="878" y="362" font-size="9">reenvia comandos sin tocar la ruta</text>
+
+  <path d="M852,214 C832,214 832,346 852,346" fill="none" stroke="#d4a853" stroke-width="1.3" marker-end="url(#sgold)"/>
+  <path d="M856,356 C840,356 840,236 856,236" fill="none" stroke="#4caf7d" stroke-width="1.3" marker-end="url(#sgreen)"/>
+  <text class="monodim" x="816" y="300" font-size="8.5" text-anchor="middle" fill="#a98a45">100</text>
+  <text class="monodim" x="816" y="312" font-size="8.5" text-anchor="middle" fill="#a98a45">ms</text>
+
+  <text class="monodim" x="862" y="404" font-size="9">&#183; alterna contexto cada 100 ms</text>
+  <text class="monodim" x="862" y="420" font-size="9">&#183; buffer circular de 8 por contexto</text>
+  <text class="monodim" x="862" y="436" font-size="9">&#183; maximo 10 peers por contexto</text>
+  <text class="monodim" x="862" y="452" font-size="9">&#183; si el buffer se llena, descarta el mas viejo</text>
+  <text class="monodim" x="862" y="474" font-size="9" fill="#d4a853">Coste: hasta 100 ms de latencia extra en el peor caso.</text>
+
+  <line x1="862" y1="492" x2="1210" y2="492" stroke="#26303f" stroke-width="1"/>
+  <text class="monodim" x="862" y="514" font-size="9">La PMK nunca viaja por radio. Se graba en EEPROM</text>
+  <text class="monodim" x="862" y="530" font-size="9">con magic "NS14" y se compila en cada endpoint.</text>
+  <text class="monodim" x="862" y="552" font-size="9" fill="#c98b6b">Quien tenga el ESP en la mano, tiene la clave.</text>
+
+  <!-- ============ LIMITACIONES ============ -->
+  <rect x="48" y="602" width="1184" height="182" rx="10" fill="#131824" stroke="#2c3648" stroke-width="1.2"/>
+  <text class="kicker" x="70" y="628" font-size="9" fill="#c98b6b">DEUDA TECNICA CONSCIENTE</text>
+  <text class="mono" x="70" y="652" font-size="11" fill="#ffffff">Lo que esta version NO resuelve</text>
+
+  <text class="monodim" x="70" y="680" font-size="9.5">1. La derivacion Bridge_0 &#8596; Gateway_0 usa XOR de claves, no un ECDH canonico.</text>
+  <text class="monodim" x="70" y="699" font-size="9.5">2. La firma ECDSA usa un XOR de 32 bytes como digest, no SHA-256.</text>
+  <text class="monodim" x="70" y="718" font-size="9.5">3. El mismo par de claves esta compilado en ambos extremos del enlace C1.</text>
+  <text class="monodim" x="70" y="737" font-size="9.5">4. La EEPROM es legible con acceso fisico al dispositivo: no hay secure element.</text>
+
+  <line x1="700" y1="668" x2="700" y2="764" stroke="#26303f" stroke-width="1"/>
+
+  <text class="mono" x="728" y="680" font-size="10" fill="#9fe0bd">Lo que si mejora v1.4</text>
+  <text class="monodim" x="728" y="702" font-size="9.5">&#183; El trafico intra-nivel deja de ir en texto plano.</text>
+  <text class="monodim" x="728" y="721" font-size="9.5">&#183; Un nodo comprometido en N2 no descifra N0 ni N1.</text>
+  <text class="monodim" x="728" y="740" font-size="9.5">&#183; PMK nativa: ~1 ms por trama frente a ~200 ms de ECC.</text>
+  <text class="monodim" x="728" y="759" font-size="9.5">&#183; Cero cambios en el protocolo serial del PC.</text>
+</svg>
