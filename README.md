@@ -645,6 +645,57 @@ Las fuentes externas, con enlaces y notas de lectura, están en [`docs/REFERENCE
 
 ---
 
+## Ficha de evaluación
+
+**Madurez global: 2.5/5**
+
+| Criterio | Nota | Evidencia |
+|---|---:|---|
+| Madurez | 1/5 | No hay firmware: las carpetas nivel_0/1/2 están vacías y ninguna prueba CP1–CP8 se ejecutó. |
+| Reproducibilidad | 1/5 | No hay binario ni controlador; el dashboard simula envíos con setTimeout y RTT fijo de 18 ms. |
+| Documentación | 4/5 | README de 656 líneas y bitácora de 294 con trama de 38 B, límites y seis correcciones explícitas. |
+| Honestidad de límites | 5/5 | Declara «arquitectura especificada, no despliegue» y corrige sus propias cifras de 35 B, 50 niveles y failover de 0 ms. |
+| Valor demostrativo | 3/5 | El esquema de ruta explícita y PMK por nivel es reutilizable como estudio de diseño, no como demo ejecutable. |
+| Facilidad de despliegue | 1/5 | No hay nada que flashear ni desplegar; solo se puede abrir una maqueta estática. |
+
+Sirve como estudio de arquitectura para quien planea una red ESP-NOW multinivel y quiere evitar promesas irreales de profundidad y failover. La limitación decisiva es que no existe implementación: no se puede validar rendimiento, alcance ni seguridad en hardware.
+
+## Lo que no funcionó
+
+### v1.4 · trama — La trama medía 38 bytes, no 35
+
+El diseño original omitía timestamp y payload en la suma; con los campos packed el total es 38 B. Se corrigió el documento y se ajustó el cálculo de buffers.
+
+### v1.4 · profundidad — No hay 50 niveles: caben 8 tramos
+
+ruta[16] consume 16 bytes y el límite real son 8 saltos, no los 50 que prometía el texto. La profundidad práctica queda en 3–4 niveles.
+
+### v1.4 · failover — El failover de 0 ms no existe
+
+La conmutación no necesita handshake, pero detectar la caída exige tres timeouts, unos 15 s. Se retiró la cifra de 0 ms y se documentó la ventana real.
+
+### v1.4 · direccionamiento — El ejemplo de ruta apuntaba al puente equivocado
+
+El flujo usaba 3:1:3 cuando el puente E0.1 corresponde a 1:1:3. Se corrigió el ejemplo y se aclaró que el primer tramo lo consume el gateway de nivel.
+
+## Preguntas típicas
+
+**¿Qué propone?**
+
+Una red ESP-NOW de tres niveles con 22 nodos donde la ruta va en el mensaje y cada gateway elimina el primer tramo antes de reenviar. El PC concentra el mapa y la lógica.
+
+**¿Qué no hace?**
+
+No hay firmware ni controlador implementado, y el dashboard solo simula los envíos. Tampoco soporta 50 niveles, failover instantáneo ni cifrado extremo a extremo.
+
+**¿Cómo se ejecuta?**
+
+No se flashea nada: el repositorio solo permite abrir pc/dashboard.html como maqueta. El controlador fractal_controller.py está especificado, no implementado.
+
+**¿Qué se puede reutilizar?**
+
+El formato de trama de 38 B, el esquema de ruta explícita, la PMK por nivel y la lista de correcciones al diseño original.
+
 ## Licencia
 
 MIT. Ver [`LICENSE`](LICENSE).
