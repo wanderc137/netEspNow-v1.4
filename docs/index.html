@@ -291,7 +291,8 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
 @media(max-width:760px){.concept-grid,.fail-grid{grid-template-columns:1fr}.concept-side{border-left:0;padding-left:0}}
 
 </style>
-<link href="assets/community.css?v=5" rel="stylesheet"/></head>
+<link href="assets/community.css?v=5" rel="stylesheet"/><link href="rec/player.css?v=1" rel="stylesheet"/>
+</head>
 <body style="--accent:#6C8CD9;--accent2:#D4A853">
 <div class="grid-overlay"></div>
 <div class="glow one"></div>
@@ -306,6 +307,7 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
 <a href="#problema">Visión</a>
 <a href="#como">Cómo funciona</a>
 <a href="#arquitectura">Arquitectura</a>
+<a href="#video">Video</a>
 <a href="#docs">Documentación</a>
 <a href="#comunidad">Comunidad</a>
 <a class="btn btn-ghost" href="https://github.com/wanderc137/netEspNow-v1.4" rel="noopener" style="padding:9px 15px" target="_blank">GitHub</a>
@@ -356,6 +358,45 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
 <div class="timeline reveal"><div class="step"><div class="step-num">01</div><div class="step-body"><h3>Arranque y beacon</h3><p>Cada nodo emite un beacon cada 2 segundos con su identificador y su nivel.</p></div></div><div class="step"><div class="step-num">02</div><div class="step-body"><h3>Descubrimiento de padre</h3><p>Un nodo nuevo escucha beacons, elige un padre disponible y se registra con una ruta explícita.</p></div></div><div class="step"><div class="step-num">03</div><div class="step-body"><h3>Ruta por niveles</h3><p>El mensaje viaja de hijo a padre hasta el nodo raíz. La ruta 1:1:3 identifica el camino sin tablas globales.</p></div></div><div class="step"><div class="step-num">04</div><div class="step-body"><h3>Auto-reparación</h3><p>Si el padre deja de responder, el nodo promueve otro candidato y reconstruye su rama.</p></div></div></div>
 </div>
 </section>
+
+<section class="section tight rec-section" id="video" style="--accent:#2E7DFF;--accent2:#14F195">
+<div class="wrap">
+<div class="rec-kicker">REC · VIDEO · 3:19</div>
+<h2 class="rec-h2">netEspNow v1.4 · la ruta vive en el mensaje</h2>
+<p class="rec-lead">Recorrido por el diseño y la implementación de referencia de netEspNow v1.4: trama empaquetada de 38 bytes, parser de ruta, reenvío sin tablas, time-division del puente, EEPROM, seguridad por nivel y el estado real del repositorio.</p>
+<div class="rec-banner">
+<span class="rec-banner-icon">📋</span>
+<strong>Puedes copiar y pegar los comandos del video desde el video !!!</strong>
+<span>Pausá, seleccioná el texto de la terminal y copiá.</span>
+</div>
+<div class="rec-shell">
+<div class="rec-bar"><i></i><i></i><i></i><span class="rec-title">netEspNow v1.4 · la ruta vive en el mensaje · asciinema</span><span class="rec-rec"><b></b>REC</span></div>
+<div class="rec-screen-wrap">
+<div class="rec-screen" id="rec-screen"></div>
+<div class="rec-poster" id="rec-poster">
+<div class="rec-kicker">ASCIINEMA · 3:19</div>
+<h3>netEspNow v1.4 · la ruta vive en el mensaje</h3>
+<p>Recorrido por el diseño y la implementación de referencia de netEspNow v1.4: trama empaquetada de 38 bytes, parser de ruta, reenvío sin tablas, time-division del puente, EEPROM, seguridad por nivel y el estado real del repositorio.</p>
+<div class="rec-poster-meta">netEspNow-v1.4 · código real</div>
+<button class="rec-btn rec-primary" id="rec-start" type="button">▶ Reproducir</button>
+</div>
+</div>
+<div class="rec-controls">
+<button class="rec-btn rec-primary" id="rec-play" type="button">▶ Reproducir</button>
+<button class="rec-btn" id="rec-restart" type="button">↺ Reiniciar</button>
+<input class="rec-progress" id="rec-range" type="range" min="0" max="1000" value="0" aria-label="Progreso"/>
+<span class="rec-time" id="rec-time">0:00 / 3:19</span>
+<select class="rec-speed" id="rec-speed" aria-label="Velocidad"><option value="1">1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+<button class="rec-btn" id="rec-full" type="button" title="Pantalla completa">⛶</button>
+<button class="rec-btn" id="rec-copy" type="button">⧉ Copiar comandos</button>
+<a class="rec-download" href="rec/netEspNow-v1.4.cast" download>descargar .cast</a>
+</div>
+</div>
+<p class="rec-note">Los fragmentos provienen de docs/developer.md, README.md y pc/dashboard.html, que son los archivos reales del repositorio. El firmware no está implementado: las carpetas nivel_* están vacías y el video lo declara explícitamente.</p>
+<div class="rec-chapters"><span class="rec-chip"><b>0:06</b> EL PROBLEMA</span><span class="rec-chip"><b>0:21</b> ARQUITECTURA</span><span class="rec-chip"><b>0:38</b> LA TRAMA</span><span class="rec-chip"><b>0:52</b> EL NÚCLEO</span><span class="rec-chip"><b>1:08</b> EL REENVÍO</span><span class="rec-chip"><b>1:23</b> TIME-DIVISION</span><span class="rec-chip"><b>1:38</b> BUFFERS</span><span class="rec-chip"><b>1:51</b> APROVISIONAMIENTO</span><span class="rec-chip"><b>2:05</b> EL CAMINO DE VUELTA</span><span class="rec-chip"><b>2:20</b> SEGURIDAD</span><span class="rec-chip"><b>2:38</b> DASHBOARD</span><span class="rec-chip"><b>2:52</b> ESTADO REAL</span></div>
+</div>
+</section>
+
 <section class="section tight" id="arquitectura">
 <div class="wrap">
 <div class="section-head reveal">
@@ -467,5 +508,7 @@ footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.08);pa
 </script>
 <script>window.PORTFOLIO_COMMUNITY = {"account": "wanderc137", "repo": "netEspNow-v1.4", "coinNamespace": "wanderc137-netespnow-v1-4-coins-v1", "faqs": [{"q": "¿Qué es una red fractal?", "a": "22 nodos ESP8266 organizados en 3 niveles; cada nodo conoce una ruta explícita como <code>1:1:3</code> y no mantiene una tabla de rutas completa."}, {"q": "¿Cuánta RAM usa por nodo?", "a": "Alrededor de <b>300–500 B</b>, porque la ruta es explícita y la tabla no crece con la red."}, {"q": "¿Cómo se cifra?", "a": "ECC en la raíz y una PMK distinta por nivel; el README declara que la capa ECC heredada es débil y debe migrarse."}, {"q": "¿Cómo se repara?", "a": "Beacons cada 2 s y auto-reparación en 5–30 s; el nodo busca una ruta alternativa."}, {"q": "¿Está implementado?", "a": "El diseño está completo y documentado; la implementación sigue pendiente. El README lo dice explícitamente."}]};</script>
 <script defer="" src="assets/community.js?v=6"></script>
+<script defer src="rec/netEspNow-v1.4.cast.js?v=1"></script>
+<script defer src="rec/player.js?v=1"></script>
 </body>
 </html>
